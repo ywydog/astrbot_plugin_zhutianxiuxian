@@ -1,0 +1,56 @@
+{
+  "青云宗": {
+    "name": "青云宗",
+    "level": 1,
+    "power": 0,
+    "min_level_id": 5,
+    "spirit_stone_pool": 0,
+    "construction_level": 1,
+    "headquarters": "暂无",
+    "divine_beast": "暂无",
+    "members": [],
+    "positions": {
+      "宗主": [],
+      "副宗主": [],
+      "长老": [],
+      "内门弟子": [],
+      "外门弟子": []
+    }
+  },
+  "合欢宗": {
+    "name": "合欢宗",
+    "level": 2,
+    "power": 0,
+    "min_level_id": 10,
+    "spirit_stone_pool": 50000,
+    "construction_level": 2,
+    "headquarters": "暂无",
+    "divine_beast": "暂无",
+    "members": [],
+    "positions": {
+      "宗主": [],
+      "副宗主": [],
+      "长老": [],
+      "内门弟子": [],
+      "外门弟子": []
+    }
+  },
+  "瑶池圣地": {
+    "name": "瑶池圣地",
+    "level": 5,
+    "power": 1,
+    "min_level_id": 42,
+    "spirit_stone_pool": 1000000,
+    "construction_level": 5,
+    "headquarters": "瑶池",
+    "divine_beast": "朱雀",
+    "members": [],
+    "positions": {
+      "宗主": [],
+      "副宗主": [],
+      "长老": [],
+      "内门弟子": [],
+      "外门弟子": []
+    }
+  }
+}

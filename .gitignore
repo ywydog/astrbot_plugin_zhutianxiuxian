@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/cmd_config.json
+data/plugin_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

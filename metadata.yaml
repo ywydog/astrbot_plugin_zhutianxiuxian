@@ -1,0 +1,9 @@
+name: astrbot_plugin_zhutianxiuxian
+display_name: 诸天万界修仙
+version: v0.1.0
+author: ywydog
+repo: https://github.com/ywydog/zhutianxiuxian
+desc: 将 Yunzai 平台的《诸天万界修仙》插件移植到 AstrBot，支持练气、炼体、秘境、宗门、副本、战斗等修仙玩法。
+short_desc: 诸天万界修仙 AstrBot 移植版
+support_platforms:
+  - aiocqhttp
