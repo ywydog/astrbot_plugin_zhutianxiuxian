@@ -1,3 +1,4 @@
+import re
 import sys
 from pathlib import Path
 
@@ -7,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, StarTools
 from astrbot.api import logger, AstrBotConfig
-from astrbot.core.message.components import At
+from astrbot.core.message.components import At, Plain
 
 from src.data.boss_data import BossData
 from src.data.chengjiu_data import ChengjiuData
@@ -70,15 +71,30 @@ class AstrBotAdapter:
         return self.event.get_group_id()
 
     async def get_at_users(self) -> list[str]:
-        """获取消息中 @ 的用户 ID 列表（过滤掉 @全体）。"""
+        """获取消息中 @ 的用户 ID 列表（兼容 QQ / 微信）。"""
         users: list[str] = []
         for comp in self.event.get_messages():
             if isinstance(comp, At) and str(comp.qq) != "all":
                 users.append(str(comp.qq))
+            elif isinstance(comp, Plain):
+                # 微信端 @ 可能以文本形式存在，例如 @wxid_xxx
+                for uid in re.findall(r"@([a-zA-Z0-9_-]{6,})", comp.text):
+                    if uid not in users:
+                        users.append(uid)
         return users
 
     async def reply_text(self, text: str) -> None:
-        self.event.set_result(self.event.plain_result(text))
+        """发送纯文本，超长时截断（避免微信单条上限）。"""
+        max_len = 2000
+        if len(text) <= max_len:
+            self.event.set_result(self.event.plain_result(text))
+            return
+        # 微信单条消息长度有限，优先返回前半段并提示后续内容
+        self.event.set_result(
+            self.event.plain_result(
+                text[:max_len] + "\n\n（消息过长，已截断，请使用分页指令查看剩余内容）"
+            )
+        )
 
 
 class ZhutianXiuxianPlugin(Star):

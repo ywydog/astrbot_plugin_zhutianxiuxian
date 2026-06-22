@@ -8,3 +8,5 @@ short_desc: 诸天万界修仙 AstrBot 移植版
 help: https://github.com/ywydog/astrbot_plugin_zhutianxiuxian
 support_platforms:
   - aiocqhttp
+  - gewechat
+  - wechat
