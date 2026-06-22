@@ -1,0 +1,38 @@
+{
+  "MASTER_IDS": {
+    "description": "超级管理员 ID 列表",
+    "type": "list",
+    "default": [],
+    "hint": "拥有最高权限的用户 ID（字符串），可用于管理员指令。"
+  },
+  "INITIAL_ADMINS": {
+    "description": "初始管理员 ID 列表",
+    "type": "list",
+    "default": [],
+    "hint": "插件加载时自动设为管理员的用户 ID（字符串）。"
+  },
+  "AUTO_TASK": {
+    "description": "自动任务奖励配置",
+    "type": "object",
+    "items": {
+      "SPIRIT_STONES": {
+        "description": "每日自动任务灵石奖励",
+        "type": "int",
+        "default": 100,
+        "hint": "开启自动任务后每日可领取的灵石数量。"
+      },
+      "SOURCE_STONES": {
+        "description": "每日自动任务源石奖励",
+        "type": "int",
+        "default": 50,
+        "hint": "开启自动任务后每日可领取的源石数量。"
+      },
+      "EXP": {
+        "description": "每日自动任务修为奖励",
+        "type": "int",
+        "default": 200,
+        "hint": "开启自动任务后每日可领取的修为数量。"
+      }
+    }
+  }
+}
