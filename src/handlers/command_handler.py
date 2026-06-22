@@ -1,4 +1,5 @@
 from src.data.boss_data import BossData
+from src.data.chengjiu_data import ChengjiuData
 from src.data.exploration_data import ExplorationData
 from src.data.item_data import ItemCatalog
 from src.data.level_data import LevelData
@@ -11,21 +12,33 @@ from src.services.battle_service import BattleService
 from src.services.boss_service import BossService
 from src.services.breakthrough_service import BreakthroughService
 from src.services.checkin_service import CheckinService
+from src.services.chengjiu_service import ChengjiuService
 from src.services.cultivation_service import CultivationService
 from src.services.daily_task_service import DailyTaskService
 from src.services.demon_service import DemonService
 from src.services.exploration_service import ExplorationService
+from src.services.admin_service import AdminService
+from src.services.auction_service import AuctionService
+from src.services.daolv_service import DaolvService
+from src.services.exchange_service import ExchangeService
 from src.services.gongfa_service import GongfaService
+from src.services.inner_world_service import InnerWorldService
 from src.services.inventory_service import InventoryService
 from src.services.lifespan_service import LifespanService
 from src.services.linggen_service import LinggenService
 from src.services.looting_service import LootingService
+from src.services.pata_service import PataService
+from src.services.team_boss_service import TeamBossService
+from src.services.xiangu_jinshi_service import XianguJinshiService
+from src.services.zhutianjing_service import ZhutianjingService
 from src.services.occupation_service import OccupationService
 from src.services.player_service import PlayerService
 from src.services.ranking_service import RankingService
 from src.services.reincarnation_service import ReincarnationService
 from src.services.sect_service import SectService
 from src.services.shitu_service import ShituService
+from src.services.smallworld_service import SmallworldService
+from src.services.tiandibang_service import TiandibangService
 from src.services.tianjiao_service import TianjiaoService
 from src.services.yuanshen_service import YuanshenService
 
@@ -67,6 +80,7 @@ class XiuxianCommandHandler:
         yuanshen_service: YuanshenService | None = None,
         inventory_service: InventoryService | None = None,
         gongfa_service: GongfaService | None = None,
+        inner_world_service: InnerWorldService | None = None,
         occupation_service: OccupationService | None = None,
         linggen_service: LinggenService | None = None,
         sect_service: SectService | None = None,
@@ -75,10 +89,21 @@ class XiuxianCommandHandler:
         looting_service: LootingService | None = None,
         reincarnation_service: ReincarnationService | None = None,
         shitu_service: ShituService | None = None,
+        smallworld_service: SmallworldService | None = None,
+        tiandibang_service: TiandibangService | None = None,
         sect_data: SectData | None = None,
         shop_data: ShopData | None = None,
         shitu_data: ShituData | None = None,
         shitu_shop_data: ShituShopData | None = None,
+        chengjiu_service: ChengjiuService | None = None,
+        xiangu_jinshi_service: XianguJinshiService | None = None,
+        auction_service: AuctionService | None = None,
+        exchange_service: ExchangeService | None = None,
+        daolv_service: DaolvService | None = None,
+        team_boss_service: TeamBossService | None = None,
+        pata_service: PataService | None = None,
+        zhutianjing_service: ZhutianjingService | None = None,
+        admin_service: AdminService | None = None,
         master_ids: set[str] | None = None,
     ):
         self.player_service = player_service
@@ -99,6 +124,7 @@ class XiuxianCommandHandler:
         self.yuanshen_service = yuanshen_service
         self.inventory_service = inventory_service
         self.gongfa_service = gongfa_service
+        self.inner_world_service = inner_world_service
         self.occupation_service = occupation_service
         self.linggen_service = linggen_service
         self.sect_service = sect_service
@@ -107,10 +133,21 @@ class XiuxianCommandHandler:
         self.looting_service = looting_service
         self.reincarnation_service = reincarnation_service
         self.shitu_service = shitu_service
+        self.smallworld_service = smallworld_service
+        self.tiandibang_service = tiandibang_service
         self.sect_data = sect_data
         self.shop_data = shop_data
         self.shitu_data = shitu_data
         self.shitu_shop_data = shitu_shop_data
+        self.chengjiu_service = chengjiu_service
+        self.xiangu_jinshi_service = xiangu_jinshi_service
+        self.auction_service = auction_service
+        self.exchange_service = exchange_service
+        self.daolv_service = daolv_service
+        self.team_boss_service = team_boss_service
+        self.pata_service = pata_service
+        self.zhutianjing_service = zhutianjing_service
+        self.admin_service = admin_service
         self.master_ids = master_ids or set()
 
     async def handle(self, adapter, message: str) -> bool:
@@ -338,6 +375,108 @@ class XiuxianCommandHandler:
             await self._show_spirit_stones_ranking(adapter)
             return True
 
+        if text == "#封神榜":
+            await self._show_fengshen_ranking(adapter)
+            return True
+
+        if text == "#遮天榜":
+            await self._show_zhetian_ranking(adapter)
+            return True
+
+        if text == "#完美世界榜":
+            await self._show_xiangu_ranking(adapter)
+            return True
+
+        if text == "#至尊榜":
+            await self._show_zhizun_ranking(adapter)
+            return True
+
+        if text == "#镇妖塔榜":
+            await self._show_zhenyao_ranking(adapter)
+            return True
+
+        if text == "#神魄榜":
+            await self._show_shenpo_ranking(adapter)
+            return True
+
+        # ---------- 天地榜 ----------
+        if text == "#报名比赛":
+            await self._tiandibang_register(adapter)
+            return True
+
+        if text == "#更新属性":
+            await self._tiandibang_update(adapter)
+            return True
+
+        if text == "#天地榜":
+            await self._tiandibang_ranking(adapter)
+            return True
+
+        if text == "#比试":
+            await self._tiandibang_challenge(adapter)
+            return True
+
+        if text == "#天地堂":
+            await self._tiandibang_shop(adapter)
+            return True
+
+        if text.startswith("#积分兑换"):
+            await self._tiandibang_exchange(adapter, text)
+            return True
+
+        if text == "#结算天地榜奖励":
+            await self._tiandibang_settle(adapter)
+            return True
+
+        if text == "#清空积分":
+            await self._tiandibang_reset(adapter)
+            return True
+
+        # ---------- 小世界 ----------
+        if text.startswith("#开辟小世界"):
+            await self._smallworld_create(adapter, text)
+            return True
+
+        if text == "#演化小世界":
+            await self._smallworld_upgrade(adapter)
+            return True
+
+        if text == "#我的小世界":
+            await self._smallworld_view(adapter)
+            return True
+
+        if text == "#将分身化入小世界":
+            await self._smallworld_avatar(adapter)
+            return True
+
+        if text == "#收获小世界资源":
+            await self._smallworld_harvest(adapter)
+            return True
+
+        if text == "#种植指南":
+            await self._smallworld_planting_help(adapter)
+            return True
+
+        if text.startswith("#小世界栽种"):
+            await self._smallworld_plant(adapter, text)
+            return True
+
+        if text.startswith("#使用") and "浇灌" in text:
+            await self._smallworld_water_single(adapter, text)
+            return True
+
+        if text == "#浇灌小世界作物":
+            await self._smallworld_water_all(adapter)
+            return True
+
+        if text.startswith("#使用") and text.endswith("创造环境"):
+            await self._smallworld_create_environment(adapter, text)
+            return True
+
+        if text == "#催熟小世界作物":
+            await self._smallworld_force_ripen(adapter)
+            return True
+
         if text == "#查看寿元":
             await self._show_lifespan(adapter)
             return True
@@ -368,6 +507,210 @@ class XiuxianCommandHandler:
 
         if text == "#内景地修炼" or text.startswith("#内景地修炼"):
             await self._neijing_batch(adapter, text)
+            return True
+
+        if text == "#开辟内景地空间":
+            await self._open_inner_world(adapter)
+            return True
+
+        if text == "#查看内景地" or text == "#我的内景地":
+            await self._view_inner_world(adapter)
+            return True
+
+        if text == "#升级内景地空间" or text == "#升级内景地":
+            await self._upgrade_inner_world(adapter)
+            return True
+
+        if text.startswith("#存入"):
+            await self._store_inner_world(adapter, text)
+            return True
+
+        if text.startswith("#取出"):
+            await self._take_inner_world(adapter, text)
+            return True
+
+        if text == "#一键存入内景地" or text == "#一键存入":
+            await self._store_all_inner_world(adapter)
+            return True
+
+        if text == "#一键取出内景地" or text == "#一键取出":
+            await self._take_all_inner_world(adapter)
+            return True
+
+        if text.startswith("#按类别取出") or text.startswith("#取出类别"):
+            await self._take_category_inner_world(adapter, text)
+            return True
+
+        if text == "#冲关":
+            await self._xiangu_breakthrough(adapter, False)
+            return True
+
+        if text == "#冲关极境":
+            await self._xiangu_breakthrough(adapter, True)
+            return True
+
+        if text.startswith("#拍卖"):
+            await self._create_auction(adapter, text)
+            return True
+
+        if text == "#查看当前拍卖":
+            await self._show_auction(adapter)
+            return True
+
+        if text.startswith("#竞价"):
+            await self._bid_auction(adapter, text)
+            return True
+
+        if text.startswith("#交易"):
+            await self._create_exchange_sell(adapter, text)
+            return True
+
+        if text == "#查看交易":
+            await self._show_exchange(adapter)
+            return True
+
+        if text.startswith("#购买"):
+            await self._buy_exchange(adapter, text)
+            return True
+
+        if text.startswith("#求购"):
+            await self._create_exchange_buy(adapter, text)
+            return True
+
+        if text.startswith("#下架"):
+            await self._remove_exchange(adapter, text)
+            return True
+
+        if text.startswith("#结为道侣"):
+            await self._propose_daolv(adapter, text)
+            return True
+
+        if text == "#同意道侣":
+            await self._respond_daolv(adapter, accept=True)
+            return True
+
+        if text == "#拒绝道侣":
+            await self._respond_daolv(adapter, accept=False)
+            return True
+
+        if text == "#我的道侣":
+            await self._show_daolv(adapter)
+            return True
+
+        if text.startswith("#赠送百合花篮"):
+            await self._gift_daolv(adapter, text)
+            return True
+
+        if text.startswith("#断绝姻缘"):
+            await self._breakup_daolv(adapter, text)
+            return True
+
+        if text.startswith("#开启团本"):
+            await self._create_team_boss(adapter, text)
+            return True
+
+        if text == "#加入团本":
+            await self._join_team_boss(adapter)
+            return True
+
+        if text == "#退出团本":
+            await self._leave_team_boss(adapter)
+            return True
+
+        if text == "#攻击团本":
+            await self._attack_team_boss(adapter)
+            return True
+
+        if text == "#团本状态":
+            await self._status_team_boss(adapter)
+            return True
+
+        if text == "#结算团本":
+            await self._settle_team_boss(adapter)
+            return True
+
+        if text == "#挑战镇妖塔":
+            await self._challenge_zhenyao(adapter)
+            return True
+
+        if text == "#一键镇妖塔":
+            await self._auto_challenge_zhenyao(adapter)
+            return True
+
+        if text == "#我的镇妖塔":
+            await self._show_zhenyao(adapter)
+            return True
+
+        if text == "#挑战锻神池":
+            await self._challenge_shenpo(adapter)
+            return True
+
+        if text == "#一键锻神池":
+            await self._auto_challenge_shenpo(adapter)
+            return True
+
+        if text == "#我的锻神池":
+            await self._show_shenpo(adapter)
+            return True
+
+        if text == "#穿越诸天镜":
+            await self._enter_zhutianjing(adapter)
+            return True
+
+        if text.startswith("#救赎"):
+            await self._redeem_zhutianjing(adapter, text)
+            return True
+
+        if text == "#魔法少女进阶":
+            await self._advance_magic_girl(adapter)
+            return True
+
+        if text == "#我的诸天镜":
+            await self._show_zhutianjing(adapter)
+            return True
+
+        if text == "#库洛牌":
+            await self._draw_clow_card(adapter)
+            return True
+
+        if text == "#备份存档":
+            await self._backup_data(adapter)
+            return True
+
+        if text.startswith("#恢复备份"):
+            await self._restore_backup(adapter, text)
+            return True
+
+        if text.startswith("#管理员加灵石"):
+            await self._admin_add_spirit_stones(adapter, text)
+            return True
+
+        if text.startswith("#管理员加源石"):
+            await self._admin_add_source_stones(adapter, text)
+            return True
+
+        if text.startswith("#管理员封号"):
+            await self._admin_ban(adapter, text)
+            return True
+
+        if text.startswith("#管理员解封"):
+            await self._admin_unban(adapter, text)
+            return True
+
+        if text.startswith("#设置时代"):
+            await self._admin_set_era(adapter, text)
+            return True
+
+        if text == "#下一个时代":
+            await self._admin_next_era(adapter)
+            return True
+
+        if text == "#纪元":
+            await self._admin_show_era(adapter)
+            return True
+
+        if text.startswith("#自动任务"):
+            await self._admin_auto_task(adapter, text)
             return True
 
         if text == "#我的纳戒" or text == "#纳戒":
@@ -636,6 +979,14 @@ class XiuxianCommandHandler:
             await self._confirm_reincarnation(adapter, text)
             return True
 
+        if text == "#验证自身成就":
+            await self._check_chengjiu(adapter)
+            return True
+
+        if text == "#修仙助手":
+            await self._xiuxian_assistant(adapter)
+            return True
+
         return False
 
     async def _checkin(self, adapter) -> None:
@@ -717,9 +1068,14 @@ class XiuxianCommandHandler:
             "探索：#秘境 #降临秘境 #禁地 #前往禁地 #仙府 #探索仙府 #仙境 #镇守仙境 #逃离 #副本掉落\n"
             "战斗：#打劫 @道友 #比武 @道友\n"
             "妖王：#开启妖王 #关闭妖王 #妖王状态 #妖王贡献榜 #讨伐妖王\n"
-            "排行：#魔道榜 #强化榜 #天榜 #灵榜\n"
+            "排行：#魔道榜 #强化榜 #天榜 #灵榜 #封神榜 #遮天榜 #完美世界榜 #至尊榜 #镇妖塔榜 #神魄榜\n"
+            "天地榜：#报名比赛 #更新属性 #天地榜 #比试 #天地堂 #积分兑换 物品名*数量\n"
+            "天地榜管理：#结算天地榜奖励 #清空积分\n"
             "寿元：#查看寿元\n"
             "元神：#我的元神 #凝练元神 #开启内景地 #进入内景地 #内景地修炼*N\n"
+            "内景地空间：#开辟内景地空间 #查看内景地 #升级内景地空间\n"
+            "           #存入 物品名*数量 #取出 物品名*数量\n"
+            "           #一键存入内景地 #一键取出内景地 #按类别取出 类别\n"
             "纳戒：#我的纳戒 #纳戒\n"
             "功法：#我的功法 #学习功法 功法名 以功法名修炼元神\n"
             "职业：#我的职业 #转职 职业名 #转换副职 #猎户转 职业名\n"
@@ -735,6 +1091,12 @@ class XiuxianCommandHandler:
             "师徒：#开启收徒 #关闭收徒 #拜师 @师傅 #解除关系 #师徒列表 #我的徒弟 #我的师傅\n"
             "      #提交师徒任务 #师徒试炼 #师徒商店 #兑换 物品名\n"
             "轮回：#轮回 #确认轮回 #先不轮回\n"
+            "小世界：#开辟小世界 名字 #演化小世界 #我的小世界\n"
+            "        #将分身化入小世界 #收获小世界资源 #种植指南\n"
+            "        #小世界栽种 种子名 #浇灌小世界作物\n"
+            "        #使用[草木精华露/岁月流金沙/掌天灵液]浇灌[位置]\n"
+            "        #使用[道具]创造环境\n"
+            "成就：#验证自身成就 #修仙助手\n"
             "设置：#设置性别 #改名 #设置道宣 #刷新信息\n"
             "发送对应指令即可体验。"
         )
@@ -2003,6 +2365,431 @@ class XiuxianCommandHandler:
         ranking = await self.ranking_service.get_spirit_stones_ranking()
         await adapter.reply_text(self._format_ranking("灵榜", ranking))
 
+    async def _show_fengshen_ranking(self, adapter) -> None:
+        if self.ranking_service is None:
+            await adapter.reply_text("排行榜服务未初始化。")
+            return
+
+        ranking = await self.ranking_service.get_fengshen_ranking()
+        await adapter.reply_text(self._format_ranking("封神榜", ranking))
+
+    async def _show_zhetian_ranking(self, adapter) -> None:
+        if self.ranking_service is None:
+            await adapter.reply_text("排行榜服务未初始化。")
+            return
+
+        ranking = await self.ranking_service.get_zhetian_ranking()
+        await adapter.reply_text(self._format_ranking("遮天榜", ranking))
+
+    async def _show_xiangu_ranking(self, adapter) -> None:
+        if self.ranking_service is None:
+            await adapter.reply_text("排行榜服务未初始化。")
+            return
+
+        ranking = await self.ranking_service.get_xiangu_ranking()
+        await adapter.reply_text(self._format_ranking("完美世界榜", ranking))
+
+    async def _show_zhizun_ranking(self, adapter) -> None:
+        if self.ranking_service is None:
+            await adapter.reply_text("排行榜服务未初始化。")
+            return
+
+        ranking = await self.ranking_service.get_zhizun_ranking()
+        await adapter.reply_text(self._format_ranking("至尊榜", ranking))
+
+    async def _show_zhenyao_ranking(self, adapter) -> None:
+        if self.ranking_service is None:
+            await adapter.reply_text("排行榜服务未初始化。")
+            return
+
+        ranking = await self.ranking_service.get_zhenyao_ranking()
+        await adapter.reply_text(self._format_ranking("镇妖塔榜", ranking))
+
+    async def _show_shenpo_ranking(self, adapter) -> None:
+        if self.ranking_service is None:
+            await adapter.reply_text("排行榜服务未初始化。")
+            return
+
+        ranking = await self.ranking_service.get_shenpo_ranking()
+        await adapter.reply_text(self._format_ranking("神魄榜", ranking))
+
+    # ---------- 天地榜 ----------
+
+    async def _tiandibang_register(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.register(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text(result.message)
+
+    async def _tiandibang_update(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.update_attributes(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+        if result.not_registered:
+            await adapter.reply_text(result.message)
+            return
+
+        await adapter.reply_text("\n".join(result.lines))
+
+    async def _tiandibang_ranking(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.my_point(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+        if result.not_registered:
+            await adapter.reply_text(result.message)
+            return
+
+        await adapter.reply_text("\n".join(result.lines))
+
+    async def _tiandibang_challenge(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.challenge(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+        if result.not_registered:
+            await adapter.reply_text(result.message)
+            return
+        if result.no_challenges:
+            await adapter.reply_text(result.message)
+            return
+
+        await adapter.reply_text("\n".join(result.lines))
+
+    async def _tiandibang_shop(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.shop_list(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+        if result.not_registered:
+            await adapter.reply_text(result.message)
+            return
+
+        await adapter.reply_text("\n".join(result.lines))
+
+    async def _tiandibang_exchange(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        raw = text[len("#积分兑换"):].strip()
+        parts = raw.split("*", 1)
+        item_name = parts[0].strip()
+        quantity = 1
+        if len(parts) > 1:
+            try:
+                quantity = max(1, int(parts[1].strip()))
+            except ValueError:
+                quantity = 1
+
+        if not item_name:
+            await adapter.reply_text("格式：#积分兑换 物品名*数量")
+            return
+
+        result = await self.tiandibang_service.exchange(user_id, item_name, quantity)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+        if result.not_registered:
+            await adapter.reply_text(result.message)
+            return
+
+        await adapter.reply_text(result.message)
+
+    async def _tiandibang_settle(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.settle_rewards(
+            user_id, self.master_ids
+        )
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _tiandibang_reset(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.tiandibang_service is None:
+            await adapter.reply_text("天地榜服务未初始化。")
+            return
+
+        result = await self.tiandibang_service.reset_scores(
+            user_id, self.master_ids
+        )
+        await adapter.reply_text(result.message)
+
+    # ---------- 小世界 ----------
+    async def _smallworld_create(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        world_name = text[len("#开辟小世界"):].strip()
+        if not world_name:
+            await adapter.reply_text("请为小世界命名，例如：#开辟小世界 青云界")
+            return
+
+        result = await self.smallworld_service.create_small_world(user_id, world_name)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_upgrade(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        result = await self.smallworld_service.upgrade_small_world(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_view(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        result = await self.smallworld_service.view_small_world(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_avatar(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        result = await self.smallworld_service.create_avatar(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text(result.message)
+
+    async def _smallworld_harvest(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        result = await self.smallworld_service.harvest_resources(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_planting_help(self, adapter) -> None:
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        await adapter.reply_text(self.smallworld_service.planting_help())
+
+    async def _smallworld_plant(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        seed_name = text[len("#小世界栽种"):].strip()
+        result = await self.smallworld_service.plant_shenyao(user_id, seed_name)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_water_single(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        # 解析 #使用[道具名]浇灌[位置]
+        import re
+        match = re.match(
+            r"^#使用\s*(草木精华露|岁月流金沙|掌天灵液)\s*(?:浇灌|催熟)?\s*(?:第)?(\d+)(?:号)?(?:作物|药田)?$",
+            text,
+        )
+        if not match:
+            await adapter.reply_text(
+                "格式错误。示例：#使用草木精华露浇灌1 或 #使用掌天灵液催熟第2号作物"
+            )
+            return
+
+        item_name = match.group(1)
+        position = int(match.group(2))
+        result = await self.smallworld_service.water_single_crop(
+            user_id, item_name, position
+        )
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_water_all(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        result = await self.smallworld_service.water_all_crops(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
+    async def _smallworld_create_environment(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        item_name = text[2:-4].strip()  # 去掉 #使用 和 创造环境
+        result = await self.smallworld_service.create_environment(user_id, item_name)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text(result.message)
+
+    async def _smallworld_force_ripen(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if user_id not in self.master_ids:
+            await adapter.reply_text("只有主人可以执行此操作。")
+            return
+
+        if self.smallworld_service is None:
+            await adapter.reply_text("小世界服务未初始化。")
+            return
+
+        result = await self.smallworld_service.force_ripen_all(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines) if result.lines else result.message)
+
     async def _show_lifespan(self, adapter) -> None:
         user_id = await adapter.get_user_id()
 
@@ -2256,6 +3043,158 @@ class XiuxianCommandHandler:
         if result.messages:
             summary += "\n" + "\n".join(result.messages)
         await adapter.reply_text(summary)
+
+    # ---------- 内景地空间 ----------
+
+    async def _open_inner_world(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        result = await self.inner_world_service.open(user_id)
+
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text(result.message)
+
+    async def _view_inner_world(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        result = await self.inner_world_service.view(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _upgrade_inner_world(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        result = await self.inner_world_service.upgrade(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _store_inner_world(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        raw = text[len("#存入"):].strip()
+        parts = raw.replace("*", " ").split()
+        if len(parts) < 1:
+            await adapter.reply_text("格式：#存入 物品名 数量\n或：#存入物品名*数量")
+            return
+
+        name = parts[0]
+        quantity = "all"
+        if len(parts) > 1:
+            quantity = parts[1]
+
+        result = await self.inner_world_service.store(user_id, name, quantity)
+        await adapter.reply_text(result.message)
+
+    async def _take_inner_world(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        raw = text[len("#取出"):].strip()
+        parts = raw.replace("*", " ").split()
+        if len(parts) < 1:
+            await adapter.reply_text("格式：#取出 物品名 数量\n或：#取出物品名*数量")
+            return
+
+        name = parts[0]
+        quantity = "all"
+        if len(parts) > 1:
+            quantity = parts[1]
+
+        result = await self.inner_world_service.take(user_id, name, quantity)
+        await adapter.reply_text(result.message)
+
+    async def _store_all_inner_world(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        result = await self.inner_world_service.store_all(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _take_all_inner_world(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        result = await self.inner_world_service.take_all(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _take_category_inner_world(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.inner_world_service is None:
+            await adapter.reply_text("内景地空间服务未初始化。")
+            return
+
+        for prefix in ("#按类别取出", "#取出类别"):
+            if text.startswith(prefix):
+                category = text[len(prefix):].strip()
+                break
+        else:
+            category = ""
+
+        if not category:
+            await adapter.reply_text("格式：#按类别取出 类别\n例如：#按类别取出 草药")
+            return
+
+        result = await self.inner_world_service.take_category(user_id, category)
+        await adapter.reply_text(result.message)
 
     async def _show_inventory(self, adapter) -> None:
         user_id = await adapter.get_user_id()
@@ -3283,4 +4222,793 @@ class XiuxianCommandHandler:
             await adapter.reply_text(result.reason)
             return
 
+        await adapter.reply_text(result.message)
+
+    async def _check_chengjiu(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.chengjiu_service is None:
+            await adapter.reply_text("成就服务未初始化。")
+            return
+
+        result = await self.chengjiu_service.check(user_id)
+        if result.message:
+            await adapter.reply_text(result.message)
+            return
+
+        lines: list[str] = []
+        if result.new:
+            lines.append("恭喜获得新成就：")
+            for item in result.new:
+                lines.append(f"【{item.get('name')}】- {item.get('desc')}")
+            lines.append("")
+
+        percent = (
+            round(result.total_unlocked / result.total_count * 100)
+            if result.total_count
+            else 0
+        )
+        lines.append(
+            f"成就进度: {result.total_unlocked}/{result.total_count} ({percent}%)"
+        )
+        lines.append("")
+        for category, data in result.by_category.items():
+            lines.append(f"【{category}】: {data['unlocked']}/{data['total']}")
+
+        await adapter.reply_text("\n".join(lines))
+
+    async def _xiuxian_assistant(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.chengjiu_service is None:
+            await adapter.reply_text("成就服务未初始化。")
+            return
+
+        result = await self.chengjiu_service.assistant(user_id)
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text("\n".join(result.lines))
+
+    # ---------- 仙骨金身 ----------
+
+    async def _xiangu_breakthrough(self, adapter, extreme: bool) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.xiangu_jinshi_service is None:
+            await adapter.reply_text("仙骨金身服务未初始化。")
+            return
+
+        result = await self.xiangu_jinshi_service.breakthrough(user_id, extreme=extreme)
+
+        if result.player_not_found:
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        await adapter.reply_text(result.message)
+
+    # ---------- 拍卖行 ----------
+
+    async def _create_auction(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.auction_service is None:
+            await adapter.reply_text("拍卖行服务未初始化。")
+            return
+
+        raw = text[len("#拍卖"):].strip()
+        parts = raw.split("*")
+        if len(parts) != 3:
+            await adapter.reply_text("格式：#拍卖物品名*起拍价*数量")
+            return
+
+        name, price_str, qty_str = parts
+        try:
+            price = int(price_str)
+            quantity = int(qty_str)
+        except ValueError:
+            await adapter.reply_text("起拍价与数量必须为整数。")
+            return
+
+        group_id = await adapter.get_group_id() or ""
+        result = await self.auction_service.create_auction(
+            user_id, name.strip(), price, quantity, group_id
+        )
+        await adapter.reply_text(result.message)
+
+    async def _show_auction(self, adapter) -> None:
+        if self.auction_service is None:
+            await adapter.reply_text("拍卖行服务未初始化。")
+            return
+
+        result = await self.auction_service.get_auction()
+        if result.no_auction:
+            await adapter.reply_text(result.message)
+            return
+
+        auction = result.auction or {}
+        bidder = auction.get("last_bidder_name") or auction.get("last_bidder_id") or "暂无"
+        msg = (
+            f"【当前拍卖】\n"
+            f"物品：{auction.get('name')}×{auction.get('quantity')}\n"
+            f"起拍价：{auction.get('start_price')}\n"
+            f"当前最高价：{auction.get('last_price')}\n"
+            f"最高出价者：{bidder}"
+        )
+        await adapter.reply_text(msg)
+
+    async def _bid_auction(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.auction_service is None:
+            await adapter.reply_text("拍卖行服务未初始化。")
+            return
+
+        price_str = text[len("#竞价"):].strip()
+        price = None
+        if price_str:
+            try:
+                price = int(price_str)
+            except ValueError:
+                await adapter.reply_text("出价必须为整数。")
+                return
+
+        result = await self.auction_service.bid(user_id, price)
+        await adapter.reply_text(result.message)
+
+    # ---------- 交易 ----------
+
+    async def _create_exchange_sell(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.exchange_service is None:
+            await adapter.reply_text("交易服务未初始化。")
+            return
+
+        raw = text[len("#交易"):].strip()
+        parts = raw.split("*")
+        if len(parts) != 3:
+            await adapter.reply_text("格式：#交易物品名*数量*单价")
+            return
+
+        name, qty_str, price_str = parts
+        try:
+            quantity = int(qty_str)
+            price = int(price_str)
+        except ValueError:
+            await adapter.reply_text("数量与单价必须为整数。")
+            return
+
+        result = await self.exchange_service.create_sell_listing(
+            user_id, name.strip(), quantity, price
+        )
+        await adapter.reply_text(result.message)
+
+    async def _show_exchange(self, adapter) -> None:
+        if self.exchange_service is None:
+            await adapter.reply_text("交易服务未初始化。")
+            return
+
+        result = await self.exchange_service.list_listings()
+        if not result.success or not result.listings:
+            await adapter.reply_text(result.message or "暂无交易挂单。")
+            return
+
+        lines = ["【交易列表】"]
+        for item in result.listings:
+            t = "卖" if item.get("type") == "sell" else "求购"
+            lines.append(
+                f"[{item.get('id', '-')}] {t} {item.get('name')}×{item.get('quantity')} "
+                f"单价{item.get('price')}"
+            )
+        await adapter.reply_text("\n".join(lines))
+
+    async def _buy_exchange(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.exchange_service is None:
+            await adapter.reply_text("交易服务未初始化。")
+            return
+
+        raw = text[len("#购买"):].strip()
+        if not raw:
+            await adapter.reply_text("格式：#购买 序号 或 #购买 物品名")
+            return
+
+        result = await self.exchange_service.buy_item(user_id, raw)
+        await adapter.reply_text(result.message)
+
+    async def _create_exchange_buy(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.exchange_service is None:
+            await adapter.reply_text("交易服务未初始化。")
+            return
+
+        raw = text[len("#求购"):].strip()
+        parts = raw.split("*")
+        if len(parts) != 3:
+            await adapter.reply_text("格式：#求购物品名*数量*单价")
+            return
+
+        name, qty_str, price_str = parts
+        try:
+            quantity = int(qty_str)
+            price = int(price_str)
+        except ValueError:
+            await adapter.reply_text("数量与单价必须为整数。")
+            return
+
+        result = await self.exchange_service.create_buy_request(
+            user_id, name.strip(), quantity, price
+        )
+        await adapter.reply_text(result.message)
+
+    async def _remove_exchange(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.exchange_service is None:
+            await adapter.reply_text("交易服务未初始化。")
+            return
+
+        name = text[len("#下架"):].strip()
+        if not name:
+            await adapter.reply_text("格式：#下架 物品名")
+            return
+
+        result = await self.exchange_service.remove_listing(user_id, name)
+        await adapter.reply_text(result.message)
+
+    # ---------- 道侣 ----------
+
+    async def _get_single_at(self, adapter) -> str | None:
+        at_users = await adapter.get_at_users()
+        if len(at_users) != 1:
+            await adapter.reply_text("请 @ 一位道友。")
+            return None
+        return at_users[0]
+
+    async def _propose_daolv(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.daolv_service is None:
+            await adapter.reply_text("道侣服务未初始化。")
+            return
+
+        target_id = await self._get_single_at(adapter)
+        if target_id is None:
+            return
+
+        result = await self.daolv_service.propose(user_id, target_id)
+        await adapter.reply_text(result.message)
+
+    async def _respond_daolv(self, adapter, accept: bool) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.daolv_service is None:
+            await adapter.reply_text("道侣服务未初始化。")
+            return
+
+        if accept:
+            result = await self.daolv_service.accept(user_id)
+        else:
+            result = await self.daolv_service.reject(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _show_daolv(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.daolv_service is None:
+            await adapter.reply_text("道侣服务未初始化。")
+            return
+
+        result = await self.daolv_service.get_my_daolv(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _gift_daolv(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.daolv_service is None:
+            await adapter.reply_text("道侣服务未初始化。")
+            return
+
+        target_id = await self._get_single_at(adapter)
+        if target_id is None:
+            return
+
+        result = await self.daolv_service.gift(user_id, target_id)
+        await adapter.reply_text(result.message)
+
+    async def _breakup_daolv(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.daolv_service is None:
+            await adapter.reply_text("道侣服务未初始化。")
+            return
+
+        target_id = await self._get_single_at(adapter)
+        if target_id is None:
+            return
+
+        result = await self.daolv_service.breakup(user_id, target_id)
+        await adapter.reply_text(result.message)
+
+    # ---------- 组队BOSS ----------
+
+    async def _create_team_boss(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.team_boss_service is None:
+            await adapter.reply_text("组队BOSS服务未初始化。")
+            return
+
+        name = text[len("#开启团本"):].strip()
+        if not name:
+            await adapter.reply_text("格式：#开启团本 BOSS名称")
+            return
+
+        result = await self.team_boss_service.create_boss(user_id, name)
+        if result.success:
+            await adapter.reply_text(
+                f"团本【{result.boss_name}】已开启！HP：{result.max_hp}"
+            )
+        else:
+            await adapter.reply_text(result.reason)
+
+    async def _join_team_boss(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.team_boss_service is None:
+            await adapter.reply_text("组队BOSS服务未初始化。")
+            return
+
+        result = await self.team_boss_service.join(user_id)
+        if result.success:
+            await adapter.reply_text(f"已加入团本【{result.boss_name}】")
+        else:
+            await adapter.reply_text(result.reason)
+
+    async def _leave_team_boss(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.team_boss_service is None:
+            await adapter.reply_text("组队BOSS服务未初始化。")
+            return
+
+        result = await self.team_boss_service.leave(user_id)
+        await adapter.reply_text(result.reason if not result.success else result.message)
+
+    async def _attack_team_boss(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.team_boss_service is None:
+            await adapter.reply_text("组队BOSS服务未初始化。")
+            return
+
+        result = await self.team_boss_service.attack(user_id)
+        await adapter.reply_text("\n".join(result.messages) if result.messages else result.reason)
+
+    async def _status_team_boss(self, adapter) -> None:
+        if self.team_boss_service is None:
+            await adapter.reply_text("组队BOSS服务未初始化。")
+            return
+
+        result = await self.team_boss_service.status()
+        if not result.success:
+            await adapter.reply_text(result.reason)
+            return
+
+        boss = result.boss or {}
+        lines = [
+            f"【{boss.get('name', '团本')}】",
+            f"HP：{boss.get('hp', 0)}/{boss.get('max_hp', 0)}",
+            "伤害榜：",
+        ]
+        for rank in result.ranking:
+            lines.append(f"{rank.get('name')}：{rank.get('damage', 0)}")
+        await adapter.reply_text("\n".join(lines))
+
+    async def _settle_team_boss(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.team_boss_service is None:
+            await adapter.reply_text("组队BOSS服务未初始化。")
+            return
+
+        result = await self.team_boss_service.settle(user_id)
+        if not result.success:
+            await adapter.reply_text(result.reason)
+            return
+
+        await adapter.reply_text("团本结算完成！\n" + "\n".join(result.rewards))
+
+    # ---------- 爬塔 ----------
+
+    async def _challenge_zhenyao(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.pata_service is None:
+            await adapter.reply_text("爬塔服务未初始化。")
+            return
+
+        result = await self.pata_service.challenge_zhenyao(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _auto_challenge_zhenyao(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.pata_service is None:
+            await adapter.reply_text("爬塔服务未初始化。")
+            return
+
+        result = await self.pata_service.auto_challenge_zhenyao(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _show_zhenyao(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.pata_service is None:
+            await adapter.reply_text("爬塔服务未初始化。")
+            return
+
+        result = await self.pata_service.get_zhenyao(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _challenge_shenpo(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.pata_service is None:
+            await adapter.reply_text("爬塔服务未初始化。")
+            return
+
+        result = await self.pata_service.challenge_shenpo(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _auto_challenge_shenpo(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.pata_service is None:
+            await adapter.reply_text("爬塔服务未初始化。")
+            return
+
+        result = await self.pata_service.auto_challenge_shenpo(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _show_shenpo(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.pata_service is None:
+            await adapter.reply_text("爬塔服务未初始化。")
+            return
+
+        result = await self.pata_service.get_shenpo(user_id)
+        await adapter.reply_text(result.message)
+
+    # ---------- 诸天镜 ----------
+
+    async def _enter_zhutianjing(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.zhutianjing_service is None:
+            await adapter.reply_text("诸天镜服务未初始化。")
+            return
+
+        result = await self.zhutianjing_service.enter_mirror(user_id)
+        if result.success and result.lines:
+            await adapter.reply_text("\n".join(result.lines))
+        else:
+            await adapter.reply_text(result.message)
+
+    async def _redeem_zhutianjing(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.zhutianjing_service is None:
+            await adapter.reply_text("诸天镜服务未初始化。")
+            return
+
+        target_id = await self._get_single_at(adapter)
+        if target_id is None:
+            return
+
+        result = await self.zhutianjing_service.redeem(user_id, target_id)
+        await adapter.reply_text(result.message)
+
+    async def _advance_magic_girl(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.zhutianjing_service is None:
+            await adapter.reply_text("诸天镜服务未初始化。")
+            return
+
+        result = await self.zhutianjing_service.advance_magic_girl(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _show_zhutianjing(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.zhutianjing_service is None:
+            await adapter.reply_text("诸天镜服务未初始化。")
+            return
+
+        result = await self.zhutianjing_service.get_mirror_stats(user_id)
+        if result.success and result.lines:
+            await adapter.reply_text("\n".join(result.lines))
+        else:
+            await adapter.reply_text(result.message)
+
+    async def _draw_clow_card(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.zhutianjing_service is None:
+            await adapter.reply_text("诸天镜服务未初始化。")
+            return
+
+        result = await self.zhutianjing_service.draw_clow_card(user_id)
+        await adapter.reply_text(result.message)
+
+    # ---------- 管理员/备份/运营 ----------
+
+    async def _backup_data(self, adapter) -> None:
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        result = await self.admin_service.backup()
+        await adapter.reply_text(result.message)
+
+    async def _restore_backup(self, adapter, text: str) -> None:
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        filename = text[len("#恢复备份"):].strip()
+        if not filename:
+            await adapter.reply_text("格式：#恢复备份 文件名")
+            return
+
+        result = await self.admin_service.restore(filename)
+        await adapter.reply_text(result.message)
+
+    async def _admin_add_spirit_stones(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        at_users = await adapter.get_at_users()
+        parts = text[len("#管理员加灵石"):].strip().split("*")
+        if len(at_users) != 1:
+            await adapter.reply_text("请 @ 一位玩家并指定数量。")
+            return
+
+        try:
+            amount = int(parts[-1]) if parts else 0
+        except ValueError:
+            await adapter.reply_text("数量必须为整数。")
+            return
+
+        result = await self.admin_service.add_spirit_stones(user_id, at_users[0], amount)
+        await adapter.reply_text(result.message)
+
+    async def _admin_add_source_stones(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        at_users = await adapter.get_at_users()
+        parts = text[len("#管理员加源石"):].strip().split("*")
+        if len(at_users) != 1:
+            await adapter.reply_text("请 @ 一位玩家并指定数量。")
+            return
+
+        try:
+            amount = int(parts[-1]) if parts else 0
+        except ValueError:
+            await adapter.reply_text("数量必须为整数。")
+            return
+
+        result = await self.admin_service.add_source_stones(user_id, at_users[0], amount)
+        await adapter.reply_text(result.message)
+
+    async def _admin_ban(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        at_users = await adapter.get_at_users()
+        if len(at_users) != 1:
+            await adapter.reply_text("请 @ 一位玩家。")
+            return
+
+        result = await self.admin_service.ban(user_id, at_users[0])
+        await adapter.reply_text(result.message)
+
+    async def _admin_unban(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        at_users = await adapter.get_at_users()
+        if len(at_users) != 1:
+            await adapter.reply_text("请 @ 一位玩家。")
+            return
+
+        result = await self.admin_service.unban(user_id, at_users[0])
+        await adapter.reply_text(result.message)
+
+    async def _admin_set_era(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        era_name = text[len("#设置时代"):].strip()
+        if not era_name:
+            await adapter.reply_text("格式：#设置时代 时代名")
+            return
+
+        result = await self.admin_service.set_era(user_id, era_name)
+        await adapter.reply_text(result.message)
+
+    async def _admin_next_era(self, adapter) -> None:
+        user_id = await adapter.get_user_id()
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        result = await self.admin_service.next_era(user_id)
+        await adapter.reply_text(result.message)
+
+    async def _admin_show_era(self, adapter) -> None:
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        result = await self.admin_service.get_era_info()
+        await adapter.reply_text(result.message)
+
+    async def _admin_auto_task(self, adapter, text: str) -> None:
+        user_id = await adapter.get_user_id()
+
+        if not await self.player_service.exists(user_id):
+            await adapter.reply_text("道友尚未踏入仙途，请发送 #踏入仙途 创建角色。")
+            return
+
+        if self.admin_service is None:
+            await adapter.reply_text("管理员服务未初始化。")
+            return
+
+        arg = text[len("#自动任务"):].strip()
+        enabled = arg in ("开启", "开", "on", "true", "1")
+        if not enabled and arg not in ("关闭", "关", "off", "false", "0"):
+            await adapter.reply_text("格式：#自动任务 开启/关闭")
+            return
+
+        result = await self.admin_service.toggle_auto_task(user_id, enabled)
         await adapter.reply_text(result.message)

@@ -4,6 +4,7 @@ from astrbot.api import logger
 from astrbot.core.message.components import At
 
 from src.data.boss_data import BossData
+from src.data.chengjiu_data import ChengjiuData
 from src.data.exploration_data import ExplorationData
 from src.data.item_data import ItemCatalog
 from src.data.level_data import LevelData
@@ -18,14 +19,24 @@ from src.services.battle_service import BattleService
 from src.services.boss_service import BossService
 from src.services.breakthrough_service import BreakthroughService
 from src.services.checkin_service import CheckinService
+from src.services.chengjiu_service import ChengjiuService
 from src.services.cultivation_service import CultivationService
 from src.services.daily_task_service import DailyTaskService
 from src.services.demon_service import DemonService
 from src.services.exploration_service import ExplorationService
+from src.services.admin_service import AdminService
+from src.services.auction_service import AuctionService
+from src.services.daolv_service import DaolvService
+from src.services.exchange_service import ExchangeService
 from src.services.gongfa_service import GongfaService
+from src.services.inner_world_service import InnerWorldService
 from src.services.inventory_service import InventoryService
 from src.services.lifespan_service import LifespanService
 from src.services.linggen_service import LinggenService
+from src.services.pata_service import PataService
+from src.services.team_boss_service import TeamBossService
+from src.services.xiangu_jinshi_service import XianguJinshiService
+from src.services.zhutianjing_service import ZhutianjingService
 from src.services.looting_service import LootingService
 from src.services.occupation_service import OccupationService
 from src.services.player_service import PlayerService
@@ -33,7 +44,9 @@ from src.services.ranking_service import RankingService
 from src.services.reincarnation_service import ReincarnationService
 from src.services.sect_service import SectService
 from src.services.shitu_service import ShituService
+from src.services.smallworld_service import SmallworldService
 from src.services.state_service import StateService
+from src.services.tiandibang_service import TiandibangService
 from src.services.tianjiao_service import TianjiaoService
 from src.services.yuanshen_service import YuanshenService
 
@@ -84,6 +97,7 @@ class ZhutianXiuxianPlugin(Star):
         self.shop_data = ShopData(data_dir=data_dir)
         self.shitu_data = ShituData(data_dir=data_dir)
         self.shitu_shop_data = ShituShopData(data_dir=data_dir)
+        self.chengjiu_data = ChengjiuData(data_dir=data_dir)
         self.breakthrough_service = BreakthroughService(
             player_service=self.player_service,
             level_data=self.level_data,
@@ -119,6 +133,18 @@ class ZhutianXiuxianPlugin(Star):
         self.ranking_service = RankingService(
             player_service=self.player_service,
             data_dir=data_dir,
+            level_data=self.level_data,
+        )
+        self.inventory_service = InventoryService(
+            player_service=self.player_service,
+        )
+        self.tiandibang_service = TiandibangService(
+            player_service=self.player_service,
+            battle_service=self.battle_service,
+            inventory_service=self.inventory_service,
+            state_service=self.state_service,
+            data_dir=data_dir,
+            item_catalog=self.item_catalog,
         )
         self.lifespan_service = LifespanService(
             player_service=self.player_service,
@@ -129,8 +155,52 @@ class ZhutianXiuxianPlugin(Star):
             level_data=self.level_data,
             state_service=self.state_service,
         )
-        self.inventory_service = InventoryService(
+        self.inner_world_service = InnerWorldService(
             player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            item_catalog=self.item_catalog,
+            data_dir=data_dir,
+        )
+        self.xiangu_jinshi_service = XianguJinshiService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            level_data=self.level_data,
+        )
+        self.auction_service = AuctionService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            data_dir=data_dir,
+        )
+        self.exchange_service = ExchangeService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            item_catalog=self.item_catalog,
+            data_dir=data_dir,
+        )
+        self.daolv_service = DaolvService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            data_dir=data_dir,
+        )
+        self.team_boss_service = TeamBossService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            battle_service=self.battle_service,
+            data_dir=data_dir,
+        )
+        self.pata_service = PataService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            data_dir=data_dir,
+        )
+        self.zhutianjing_service = ZhutianjingService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            data_dir=data_dir,
+        )
+        self.admin_service = AdminService(
+            player_service=self.player_service,
+            data_dir=data_dir,
         )
         self.gongfa_service = GongfaService(
             player_service=self.player_service,
@@ -181,6 +251,15 @@ class ZhutianXiuxianPlugin(Star):
             shitu_data=self.shitu_data,
             shop_data=self.shitu_shop_data,
         )
+        self.smallworld_service = SmallworldService(
+            player_service=self.player_service,
+            inventory_service=self.inventory_service,
+            data_dir=data_dir,
+        )
+        self.chengjiu_service = ChengjiuService(
+            player_service=self.player_service,
+            chengjiu_data=self.chengjiu_data,
+        )
         self.command_handler = XiuxianCommandHandler(
             player_service=self.player_service,
             checkin_service=self.checkin_service,
@@ -200,6 +279,15 @@ class ZhutianXiuxianPlugin(Star):
             yuanshen_service=self.yuanshen_service,
             inventory_service=self.inventory_service,
             gongfa_service=self.gongfa_service,
+            inner_world_service=self.inner_world_service,
+            xiangu_jinshi_service=self.xiangu_jinshi_service,
+            auction_service=self.auction_service,
+            exchange_service=self.exchange_service,
+            daolv_service=self.daolv_service,
+            team_boss_service=self.team_boss_service,
+            pata_service=self.pata_service,
+            zhutianjing_service=self.zhutianjing_service,
+            admin_service=self.admin_service,
             occupation_service=self.occupation_service,
             linggen_service=self.linggen_service,
             sect_service=self.sect_service,
@@ -208,10 +296,13 @@ class ZhutianXiuxianPlugin(Star):
             looting_service=self.looting_service,
             reincarnation_service=self.reincarnation_service,
             shitu_service=self.shitu_service,
+            smallworld_service=self.smallworld_service,
+            tiandibang_service=self.tiandibang_service,
             sect_data=self.sect_data,
             shop_data=self.shop_data,
             shitu_data=self.shitu_data,
             shitu_shop_data=self.shitu_shop_data,
+            chengjiu_service=self.chengjiu_service,
         )
         logger.info("[诸天万界修仙] 插件已初始化")
 
@@ -535,6 +626,129 @@ class ZhutianXiuxianPlugin(Star):
         """查看灵榜（灵石排行）"""
         await self._dispatch(event)
 
+    @filter.command("封神榜")
+    async def show_fengshen_ranking(self, event: AstrMessageEvent):
+        """查看封神榜"""
+        await self._dispatch(event)
+
+    @filter.command("遮天榜")
+    async def show_zhetian_ranking(self, event: AstrMessageEvent):
+        """查看遮天榜"""
+        await self._dispatch(event)
+
+    @filter.command("完美世界榜")
+    async def show_xiangu_ranking(self, event: AstrMessageEvent):
+        """查看完美世界榜"""
+        await self._dispatch(event)
+
+    @filter.command("至尊榜")
+    async def show_zhizun_ranking(self, event: AstrMessageEvent):
+        """查看至尊榜"""
+        await self._dispatch(event)
+
+    @filter.command("镇妖塔榜")
+    async def show_zhenyao_ranking(self, event: AstrMessageEvent):
+        """查看镇妖塔榜"""
+        await self._dispatch(event)
+
+    @filter.command("神魄榜")
+    async def show_shenpo_ranking(self, event: AstrMessageEvent):
+        """查看神魄榜"""
+        await self._dispatch(event)
+
+    # ---------- 天地榜 ----------
+
+    @filter.command("报名比赛")
+    async def tiandibang_register(self, event: AstrMessageEvent):
+        """报名参加天地榜"""
+        await self._dispatch(event)
+
+    @filter.command("更新属性")
+    async def tiandibang_update(self, event: AstrMessageEvent):
+        """更新天地榜属性快照"""
+        await self._dispatch(event)
+
+    @filter.command("天地榜")
+    async def tiandibang_ranking(self, event: AstrMessageEvent):
+        """查看天地榜及个人排名"""
+        await self._dispatch(event)
+
+    @filter.command("比试")
+    async def tiandibang_challenge(self, event: AstrMessageEvent):
+        """天地榜比试"""
+        await self._dispatch(event)
+
+    @filter.command("天地堂")
+    async def tiandibang_shop(self, event: AstrMessageEvent):
+        """查看天地堂商品"""
+        await self._dispatch(event)
+
+    @filter.command("积分兑换")
+    async def tiandibang_exchange(self, event: AstrMessageEvent):
+        """天地榜积分兑换物品"""
+        await self._dispatch(event)
+
+    @filter.command("结算天地榜奖励")
+    async def tiandibang_settle(self, event: AstrMessageEvent):
+        """结算天地榜奖励（管理员）"""
+        await self._dispatch(event)
+
+    @filter.command("清空积分")
+    async def tiandibang_reset(self, event: AstrMessageEvent):
+        """清空天地榜积分（管理员）"""
+        await self._dispatch(event)
+
+    # ---------- 小世界 ----------
+    @filter.command("开辟小世界")
+    async def smallworld_create(self, event: AstrMessageEvent):
+        """开辟小世界"""
+        await self._dispatch(event)
+
+    @filter.command("演化小世界")
+    async def smallworld_upgrade(self, event: AstrMessageEvent):
+        """演化小世界"""
+        await self._dispatch(event)
+
+    @filter.command("我的小世界")
+    async def smallworld_view(self, event: AstrMessageEvent):
+        """查看我的小世界"""
+        await self._dispatch(event)
+
+    @filter.command("将分身化入小世界")
+    async def smallworld_avatar(self, event: AstrMessageEvent):
+        """将分身化入小世界"""
+        await self._dispatch(event)
+
+    @filter.command("收获小世界资源")
+    async def smallworld_harvest(self, event: AstrMessageEvent):
+        """收获小世界资源"""
+        await self._dispatch(event)
+
+    @filter.command("种植指南")
+    async def smallworld_planting_help(self, event: AstrMessageEvent):
+        """查看小世界种植指南"""
+        await self._dispatch(event)
+
+    @filter.command("小世界栽种")
+    async def smallworld_plant(self, event: AstrMessageEvent):
+        """在小世界栽种神药"""
+        await self._dispatch(event)
+
+    @filter.command("浇灌小世界作物")
+    async def smallworld_water_all(self, event: AstrMessageEvent):
+        """使用乾坤造化瓶浇灌全部作物"""
+        await self._dispatch(event)
+
+    @filter.command("使用")
+    async def smallworld_use_item(self, event: AstrMessageEvent):
+        """使用道具浇灌作物或创造环境"""
+        await self._dispatch(event)
+
+    @filter.command("催熟小世界作物")
+    async def smallworld_force_ripen(self, event: AstrMessageEvent):
+        """管理员催熟小世界作物"""
+        await self._dispatch(event)
+
     @filter.command("查看寿元")
     async def show_lifespan(self, event: AstrMessageEvent):
         """查看当前寿元"""
@@ -568,6 +782,256 @@ class ZhutianXiuxianPlugin(Star):
     @filter.command("内景地修炼")
     async def neijing_batch(self, event: AstrMessageEvent):
         """批量内景地修炼"""
+        await self._dispatch(event)
+
+    @filter.command("开辟内景地空间")
+    async def open_inner_world(self, event: AstrMessageEvent):
+        """开辟内景地空间仓库"""
+        await self._dispatch(event)
+
+    @filter.command("查看内景地")
+    async def view_inner_world(self, event: AstrMessageEvent):
+        """查看内景地空间仓库"""
+        await self._dispatch(event)
+
+    @filter.command("升级内景地空间")
+    async def upgrade_inner_world(self, event: AstrMessageEvent):
+        """升级内景地空间仓库"""
+        await self._dispatch(event)
+
+    @filter.command("存入")
+    async def store_inner_world(self, event: AstrMessageEvent):
+        """存入物品到内景地空间"""
+        await self._dispatch(event)
+
+    @filter.command("取出")
+    async def take_inner_world(self, event: AstrMessageEvent):
+        """从内景地空间取出物品"""
+        await self._dispatch(event)
+
+    @filter.command("一键存入内景地")
+    async def store_all_inner_world(self, event: AstrMessageEvent):
+        """一键存入物品到内景地空间"""
+        await self._dispatch(event)
+
+    @filter.command("一键取出内景地")
+    async def take_all_inner_world(self, event: AstrMessageEvent):
+        """一键取出内景地空间物品"""
+        await self._dispatch(event)
+
+    @filter.command("冲关")
+    async def xiangu_breakthrough(self, event: AstrMessageEvent):
+        """仙古今世法普通冲关"""
+        await self._dispatch(event)
+
+    @filter.command("冲关极境")
+    async def xiangu_extreme(self, event: AstrMessageEvent):
+        """仙古今世法极境冲关"""
+        await self._dispatch(event)
+
+    @filter.command("拍卖")
+    async def create_auction(self, event: AstrMessageEvent):
+        """上架物品到拍卖行"""
+        await self._dispatch(event)
+
+    @filter.command("查看当前拍卖")
+    async def show_auction(self, event: AstrMessageEvent):
+        """查看当前拍卖"""
+        await self._dispatch(event)
+
+    @filter.command("竞价")
+    async def bid_auction(self, event: AstrMessageEvent):
+        """拍卖出价"""
+        await self._dispatch(event)
+
+    @filter.command("交易")
+    async def exchange_sell(self, event: AstrMessageEvent):
+        """上架物品交易"""
+        await self._dispatch(event)
+
+    @filter.command("查看交易")
+    async def show_exchange(self, event: AstrMessageEvent):
+        """查看交易列表"""
+        await self._dispatch(event)
+
+    @filter.command("购买")
+    async def exchange_buy(self, event: AstrMessageEvent):
+        """购买交易物品"""
+        await self._dispatch(event)
+
+    @filter.command("求购")
+    async def exchange_request(self, event: AstrMessageEvent):
+        """发布求购信息"""
+        await self._dispatch(event)
+
+    @filter.command("下架")
+    async def exchange_remove(self, event: AstrMessageEvent):
+        """下架交易挂单"""
+        await self._dispatch(event)
+
+    @filter.command("结为道侣")
+    async def propose_daolv(self, event: AstrMessageEvent):
+        """向指定玩家结为道侣"""
+        await self._dispatch(event)
+
+    @filter.command("同意道侣")
+    async def accept_daolv(self, event: AstrMessageEvent):
+        """同意道侣请求"""
+        await self._dispatch(event)
+
+    @filter.command("拒绝道侣")
+    async def reject_daolv(self, event: AstrMessageEvent):
+        """拒绝道侣请求"""
+        await self._dispatch(event)
+
+    @filter.command("我的道侣")
+    async def show_daolv(self, event: AstrMessageEvent):
+        """查看道侣信息"""
+        await self._dispatch(event)
+
+    @filter.command("赠送百合花篮")
+    async def gift_daolv(self, event: AstrMessageEvent):
+        """赠送百合花篮提升亲密度"""
+        await self._dispatch(event)
+
+    @filter.command("断绝姻缘")
+    async def breakup_daolv(self, event: AstrMessageEvent):
+        """断绝道侣关系"""
+        await self._dispatch(event)
+
+    @filter.command("开启团本")
+    async def create_team_boss(self, event: AstrMessageEvent):
+        """开启团队BOSS副本"""
+        await self._dispatch(event)
+
+    @filter.command("加入团本")
+    async def join_team_boss(self, event: AstrMessageEvent):
+        """加入当前团本"""
+        await self._dispatch(event)
+
+    @filter.command("退出团本")
+    async def leave_team_boss(self, event: AstrMessageEvent):
+        """退出当前团本"""
+        await self._dispatch(event)
+
+    @filter.command("攻击团本")
+    async def attack_team_boss(self, event: AstrMessageEvent):
+        """攻击团本BOSS"""
+        await self._dispatch(event)
+
+    @filter.command("团本状态")
+    async def status_team_boss(self, event: AstrMessageEvent):
+        """查看团本状态"""
+        await self._dispatch(event)
+
+    @filter.command("结算团本")
+    async def settle_team_boss(self, event: AstrMessageEvent):
+        """结算团本奖励"""
+        await self._dispatch(event)
+
+    @filter.command("挑战镇妖塔")
+    async def challenge_zhenyao(self, event: AstrMessageEvent):
+        """挑战镇妖塔"""
+        await self._dispatch(event)
+
+    @filter.command("一键镇妖塔")
+    async def auto_challenge_zhenyao(self, event: AstrMessageEvent):
+        """一键挑战镇妖塔"""
+        await self._dispatch(event)
+
+    @filter.command("我的镇妖塔")
+    async def show_zhenyao(self, event: AstrMessageEvent):
+        """查看镇妖塔进度"""
+        await self._dispatch(event)
+
+    @filter.command("挑战锻神池")
+    async def challenge_shenpo(self, event: AstrMessageEvent):
+        """挑战锻神池"""
+        await self._dispatch(event)
+
+    @filter.command("一键锻神池")
+    async def auto_challenge_shenpo(self, event: AstrMessageEvent):
+        """一键挑战锻神池"""
+        await self._dispatch(event)
+
+    @filter.command("我的锻神池")
+    async def show_shenpo(self, event: AstrMessageEvent):
+        """查看锻神池进度"""
+        await self._dispatch(event)
+
+    @filter.command("穿越诸天镜")
+    async def enter_zhutianjing(self, event: AstrMessageEvent):
+        """穿越诸天镜"""
+        await self._dispatch(event)
+
+    @filter.command("救赎")
+    async def redeem_zhutianjing(self, event: AstrMessageEvent):
+        """诸天镜救赎"""
+        await self._dispatch(event)
+
+    @filter.command("魔法少女进阶")
+    async def advance_magic_girl(self, event: AstrMessageEvent):
+        """魔法少女进阶"""
+        await self._dispatch(event)
+
+    @filter.command("我的诸天镜")
+    async def show_zhutianjing(self, event: AstrMessageEvent):
+        """查看诸天镜信息"""
+        await self._dispatch(event)
+
+    @filter.command("库洛牌")
+    async def draw_clow_card(self, event: AstrMessageEvent):
+        """抽取库洛牌"""
+        await self._dispatch(event)
+
+    @filter.command("备份存档")
+    async def backup_data(self, event: AstrMessageEvent):
+        """备份玩家数据"""
+        await self._dispatch(event)
+
+    @filter.command("恢复备份")
+    async def restore_backup(self, event: AstrMessageEvent):
+        """从备份恢复"""
+        await self._dispatch(event)
+
+    @filter.command("管理员加灵石")
+    async def admin_add_spirit_stones(self, event: AstrMessageEvent):
+        """管理员给玩家加灵石"""
+        await self._dispatch(event)
+
+    @filter.command("管理员加源石")
+    async def admin_add_source_stones(self, event: AstrMessageEvent):
+        """管理员给玩家加源石"""
+        await self._dispatch(event)
+
+    @filter.command("管理员封号")
+    async def admin_ban(self, event: AstrMessageEvent):
+        """管理员封号"""
+        await self._dispatch(event)
+
+    @filter.command("管理员解封")
+    async def admin_unban(self, event: AstrMessageEvent):
+        """管理员解封"""
+        await self._dispatch(event)
+
+    @filter.command("设置时代")
+    async def admin_set_era(self, event: AstrMessageEvent):
+        """设置当前时代"""
+        await self._dispatch(event)
+
+    @filter.command("下一个时代")
+    async def admin_next_era(self, event: AstrMessageEvent):
+        """进入下一个时代"""
+        await self._dispatch(event)
+
+    @filter.command("纪元")
+    async def admin_show_era(self, event: AstrMessageEvent):
+        """查看当前纪元"""
+        await self._dispatch(event)
+
+    @filter.command("自动任务")
+    async def admin_auto_task(self, event: AstrMessageEvent):
+        """开启/关闭自动任务"""
         await self._dispatch(event)
 
     @filter.command("我的纳戒")
@@ -908,6 +1372,16 @@ class ZhutianXiuxianPlugin(Star):
     @filter.command("先不轮回")
     async def cancel_reincarnation(self, event: AstrMessageEvent):
         """取消轮回"""
+        await self._dispatch(event)
+
+    @filter.command("验证自身成就")
+    async def check_chengjiu(self, event: AstrMessageEvent):
+        """验证并领取成就"""
+        await self._dispatch(event)
+
+    @filter.command("修仙助手")
+    async def xiuxian_assistant(self, event: AstrMessageEvent):
+        """修仙助手"""
         await self._dispatch(event)
 
     async def _dispatch(self, event: AstrMessageEvent) -> None:

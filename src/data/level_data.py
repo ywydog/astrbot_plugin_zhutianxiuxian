@@ -67,6 +67,12 @@ class LevelData:
     def get_xiangu_name(self, level_id: int) -> str:
         return self._get_name(self.xiangu_levels, level_id)
 
+    def get_xiangu(self, level_id: int) -> dict | None:
+        for item in self.xiangu_levels:
+            if item.get("level_id") == level_id:
+                return item
+        return None
+
     def get_yuanshen_name(self, level_id: int) -> str:
         return self._get_name(self.yuanshen_levels, level_id)
 

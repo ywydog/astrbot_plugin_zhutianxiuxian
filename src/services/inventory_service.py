@@ -150,8 +150,9 @@ class InventoryService:
         category: str,
         name: str,
         quantity: int = 1,
+        pinji: int | None = None,
     ) -> InventoryResult:
-        """从纳戒移除物品。"""
+        """从纳戒移除物品。若指定 pinji，仅移除对应品级的装备条目。"""
         if category not in ITEM_CATEGORIES:
             return InventoryResult(
                 category=category, name=name, quantity=quantity, message="未知物品类别"
@@ -172,7 +173,9 @@ class InventoryService:
 
         items: list[dict] = inventory.get(category, [])
         for item in items:
-            if item.get("name") == name:
+            if item.get("name") == name and (
+                pinji is None or item.get("pinji") == pinji
+            ):
                 current = int(item.get("quantity", 1))
                 if current < quantity:
                     return InventoryResult(
@@ -209,27 +212,19 @@ class InventoryService:
         category: str,
         name: str,
         quantity: int = 1,
+        pinji: int | None = None,
     ) -> bool:
-        """检查纳戒中是否拥有足够数量的物品。"""
-        if category not in ITEM_CATEGORIES:
-            return False
-
-        inventory = await self.load_inventory(user_id)
-        if inventory is None:
-            return False
-
-        for item in inventory.get(category, []):
-            if item.get("name") == name and int(item.get("quantity", 1)) >= quantity:
-                return True
-        return False
+        """检查纳戒中是否拥有足够数量的物品。若指定 pinji，仅统计对应品级。"""
+        return await self.get_count(user_id, category, name, pinji=pinji) >= quantity
 
     async def get_count(
         self,
         user_id: str,
         category: str,
         name: str,
+        pinji: int | None = None,
     ) -> int:
-        """获取纳戒中某物品数量。"""
+        """获取纳戒中某物品数量。若指定 pinji，仅统计对应品级。"""
         if category not in ITEM_CATEGORIES:
             return 0
 
@@ -241,4 +236,5 @@ class InventoryService:
             int(item.get("quantity", 1))
             for item in inventory.get(category, [])
             if item.get("name") == name
+            and (pinji is None or item.get("pinji") == pinji)
         )
