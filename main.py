@@ -84,9 +84,9 @@ class AstrBotAdapter:
 class ZhutianXiuxianPlugin(Star):
     """诸天万界修仙：将 Yunzai 平台修仙插件移植到 AstrBot。"""
 
-    def __init__(self, context: Context, config: AstrBotConfig):
+    def __init__(self, context: Context, config: AstrBotConfig | None = None):
         super().__init__(context)
-        self.config = config
+        self.config = config or AstrBotConfig({})
         data_dir = StarTools.get_data_dir("astrbot_plugin_zhutianxiuxian")
         self.player_service = PlayerService(data_dir=data_dir)
         self.state_service = StateService(data_dir=data_dir)
