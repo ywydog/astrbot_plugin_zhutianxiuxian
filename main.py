@@ -181,7 +181,6 @@ class ZhutianXiuxianPlugin(Star):
         self.exchange_service = ExchangeService(
             player_service=self.player_service,
             inventory_service=self.inventory_service,
-            item_catalog=self.item_catalog,
             data_dir=data_dir,
         )
         self.daolv_service = DaolvService(
