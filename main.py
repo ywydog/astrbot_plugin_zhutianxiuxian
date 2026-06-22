@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# 确保 AstrBot 加载插件时能从插件根目录导入 src 包
+sys.path.insert(0, str(Path(__file__).parent))
+
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, StarTools
 from astrbot.api import logger, AstrBotConfig
