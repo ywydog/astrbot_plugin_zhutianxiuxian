@@ -1,3 +1,5 @@
+from typing import Any
+
 from src.data.boss_data import BossData
 from src.data.chengjiu_data import ChengjiuData
 from src.data.exploration_data import ExplorationData
